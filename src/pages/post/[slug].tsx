@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 
 import { getPrismicClient } from '../../services/prismic';
+import Head from 'next/head';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -26,9 +27,15 @@ interface PostProps {
   post: Post;
 }
 
-// export default function Post() {
-//   // TODO
-// }
+export default function Post() {
+  return (
+    <>
+      <Head>
+        <title>Criando um app CRA do zero | spacetraveling </title>
+      </Head>
+    </>
+  );
+}
 
 // export const getStaticPaths = async () => {
 //   const prismic = getPrismicClient();
