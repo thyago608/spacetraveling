@@ -1,4 +1,4 @@
-.postItem{
+.post{
     a{
         strong{
             font-size: 1.8rem;
@@ -37,7 +37,7 @@
         }
     }
 
-    & + .postItem{
+    & + .post{
         margin-top: 3rem;
     }
 }
