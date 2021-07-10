@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { GetStaticProps } from 'next';
 
 import { getPrismicClient } from '../services/prismic';
@@ -6,7 +7,7 @@ import { RichText } from 'prismic-dom';
 import Head from 'next/head';
 import Link from 'next/link';
 
-import { format, getMonth } from 'date-fns';
+import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 import { FiCalendar, FiUser } from 'react-icons/fi';
@@ -34,6 +35,44 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }:HomeProps) {
+  const [posts, setPosts] = useState<PostPagination[]>([]);
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+ 
+  async function handleSearchMorePosts(){
+      if(nextPage){  
+          const response = await fetch(nextPage);
+          const data = await response.json();
+
+          const postsCurrent = data.results.map(post => {
+            return {
+              uid: post.uid, 
+              first_publication_date: post.first_publication_date,
+              data: {
+                title:post.data.title,
+                subtitle:post.data.subtitle, 
+                author: post.data.author
+              }
+            }
+          });
+
+          const postsPagination = {
+            next_page: data.next_page,
+            results: postsCurrent
+          };
+
+
+          setPosts(postsOld => [...postsOld, postsPagination]);
+          console.log(nextPage)
+        return;
+      }
+  }
+
+  useEffect(() => {
+    setPosts([postsPagination]);
+  },[]);
+
+
+  console.log(posts)
 
   return(
     <>
@@ -41,47 +80,31 @@ export default function Home({ postsPagination }:HomeProps) {
          <title> Posts | spacetraveling </title>
       </Head>
       <main className={commonStyles.container}>
-          <div className={styles.post}>
-             <Link href="/post/aijaijs">
-                <a>
-                    <strong>Criando um app CRA do zero</strong>
-                    <p>Tudo sobre como criar a sua primeira aplicação utilizando Create React App</p>
-                    <div className={styles.blockIcon}>
-                        <span>
+          <div className={styles.posts}>
+             {
+               postsPagination.results.map(post=>(
+                  <Link href={`/post/${post?.uid}`} key={post.uid}>
+                    <a>
+                        <strong>{post.data.title}</strong>
+                        <p>{post.data.subtitle}</p>
+                        <div>
                             <FiCalendar/>
-                            <time>15 Mar 2021</time>           
-                        </span>
-
-                        <span>
+                            <time>{format(new Date(post.first_publication_date), 'PP',{
+                                locale: ptBR
+                                })}
+                          </time>           
                             <FiUser/>
-                            <strong>15 Mar 2021</strong>
-                        </span>           
-                    </div>
-                </a>
-             </Link>
-          </div>
+                            <span>{post.data.author}</span>
+                        </div>
+                    </a>
+              </Link>            
+            ))
+          }
+        </div>
 
-          <div className={styles.post}>
-             <Link href="">
-                <a>
-                    <strong>Criando um app CRA do zero</strong>
-                    <p>Tudo sobre como criar a sua primeira aplicação utilizando Create React App</p>
-                    <div className={styles.blockIcon}>
-                        <span>
-                            <FiCalendar/>
-                            <time>15 Mar 2021</time>           
-                        </span>
 
-                        <span>
-                            <FiUser/>
-                            <strong>15 Mar 2021</strong>
-                        </span>           
-                    </div>
-                </a>
-             </Link>
-          </div>
-
-          <a href="#" className={styles.morePosts}>Carregar mais posts</a> 
+        { nextPage && <button onClick={handleSearchMorePosts} className={styles.morePosts}>Carregar mais posts</button>
+        }
       </main>
     </>
   );
@@ -95,7 +118,7 @@ export const getStaticProps:GetStaticProps = async () =>{
     Prismic.predicates.at('document.type', 'posts')],
     {
       fetch:['post.title','post.subtitle','post.author','post.banner','post.content'],
-      pageSize: 3
+      pageSize: 1
     }
   );
 
@@ -103,9 +126,7 @@ export const getStaticProps:GetStaticProps = async () =>{
   const posts = response.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(new Date(post.first_publication_date), 'PP',{
-        locale: ptBR
-      }),
+      first_publication_date: post.first_publication_date,
       data:{
         title: post.data.title,
         subtitle: post.data.subtitle,
