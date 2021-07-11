@@ -35,44 +35,43 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }:HomeProps) {
-  const [posts, setPosts] = useState<PostPagination[]>([]);
-  const [nextPage, setNextPage] = useState(postsPagination.next_page);
- 
-  async function handleSearchMorePosts(){
-      if(nextPage){  
-          const response = await fetch(nextPage);
-          const data = await response.json();
+  const [nextPage, setNexPage] = useState(postsPagination.next_page);
+  const [posts, setPosts] = useState<Post[]>(() => {
+    const postsFormatted = postsPagination.results.map(post => {
+      return {
+        uid: post.uid,
+        first_publication_date: format(new Date(post.first_publication_date), 'PP',{ locale: ptBR}),
+        data:{
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        }
+      }
+    });
+    return postsFormatted;
+  });
 
-          const postsCurrent = data.results.map(post => {
-            return {
-              uid: post.uid, 
-              first_publication_date: post.first_publication_date,
-              data: {
-                title:post.data.title,
-                subtitle:post.data.subtitle, 
-                author: post.data.author
-              }
+  async function handleNextPage(){
+
+      if(nextPage){
+        const data = await fetch(nextPage).then(response => response.json());
+
+        const postsCurrent = data.results.map(post => {
+          return {
+            uid: post.uid,
+            first_publication_date: format(new Date(post.first_publication_date), 'PP',{ locale: ptBR}),
+            data:{
+              title: post.data.title,
+              subtitle: post.data.subtitle,
+              author: post.data.author,
             }
-          });
-
-          const postsPagination = {
-            next_page: data.next_page,
-            results: postsCurrent
-          };
-
-
-          setPosts(postsOld => [...postsOld, postsPagination]);
-          console.log(nextPage)
-        return;
+          }
+        })
+    
+        setPosts([...posts, ...postsCurrent]);
+        setNexPage(data.next_page);
       }
   }
-
-  useEffect(() => {
-    setPosts([postsPagination]);
-  },[]);
-
-
-  console.log(posts)
 
   return(
     <>
@@ -82,17 +81,14 @@ export default function Home({ postsPagination }:HomeProps) {
       <main className={commonStyles.container}>
           <div className={styles.posts}>
              {
-               postsPagination.results.map(post=>(
-                  <Link href={`/post/${post?.uid}`} key={post.uid}>
+               posts.map(post=>(
+                  <Link href={`/post/${post.uid}`} key={post.uid}>
                     <a>
                         <strong>{post.data.title}</strong>
                         <p>{post.data.subtitle}</p>
                         <div>
                             <FiCalendar/>
-                            <time>{format(new Date(post.first_publication_date), 'PP',{
-                                locale: ptBR
-                                })}
-                          </time>           
+                            <time>{post.first_publication_date}</time>           
                             <FiUser/>
                             <span>{post.data.author}</span>
                         </div>
@@ -102,9 +98,7 @@ export default function Home({ postsPagination }:HomeProps) {
           }
         </div>
 
-
-        { nextPage && <button onClick={handleSearchMorePosts} className={styles.morePosts}>Carregar mais posts</button>
-        }
+         {nextPage && <button type="button" className={styles.morePosts}onClick={handleNextPage}>Carregar mais posts</button>}
       </main>
     </>
   );
