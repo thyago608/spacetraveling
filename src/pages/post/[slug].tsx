@@ -3,6 +3,7 @@ import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { getPrismicClient } from '../../services/prismic';
 import Head from 'next/head';
+import { RichText } from 'prismic-dom';
 
 import { FiUser, FiCalendar, FiClock } from 'react-icons/fi';
 
@@ -99,16 +100,54 @@ export default function Post() {
   );
 }
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient();
-//   const posts = await prismic.query(TODO);
+export const getStaticPaths:GetStaticPaths = async () => {
+  const prismic = getPrismicClient();
+  // const posts = await prismic.query(TODO);
+  return{
+    paths:[],
+    fallback:'blocking'
+  }
 
-//   // TODO
-// };
 
-// export const getStaticProps = async context => {
-//   const prismic = getPrismicClient();
-//   const response = await prismic.getByUID(TODO);
+  // TODO
+};
 
-//   // TODO
-// };
+export const getStaticProps:GetStaticProps = async({params}) => {
+  //Parâmetros da rota
+  const { slug } = params;
+  
+  //Iniciando o cliente prismic
+  const prismic = getPrismicClient();
+  
+  const response = await prismic.getByUID('posts',String(slug),{});
+
+  const post = {
+    first_publication_date: response.first_publication_date,
+    data:{
+      title: response.data.title,
+      banner:{
+        url: response.href,
+      },          
+    },
+    author: response.data.author,
+    content: response.data.content.map(content => {
+      return{
+        heading: content.heading,
+        body: content.body.map(bodyContent =>{
+          return {
+            text: bodyContent.text
+          }
+        })
+      }
+    })
+  }
+
+
+ console.log(JSON.stringify(post, null, 2))
+  
+  return {
+    props:{
+      
+    }
+  }
+};
