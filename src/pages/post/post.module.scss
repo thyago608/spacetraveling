@@ -71,6 +71,18 @@
             font-size: 1.1rem;
         }
 
+        *, a{
+            color: var(--body);
+        }
+    
+        a{
+            text-decoration: none;
+    
+            &:hover{
+                text-decoration: underline;
+            }
+        }
+
 
      
     }

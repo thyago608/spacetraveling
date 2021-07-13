@@ -1,8 +1,12 @@
 import React from 'react';
+import Head from 'next/head';
 
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { getPrismicClient } from '../../services/prismic';
-import Head from 'next/head';
+
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+
 import { RichText } from 'prismic-dom';
 
 import { FiUser, FiCalendar, FiClock } from 'react-icons/fi';
@@ -31,7 +35,37 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post() {
+export default function Post({post}:PostProps) {
+
+  const postFormatted = {
+      first_publication_date: format(new Date(post.first_publication_date), 'PP', { locale: ptBR}),
+      data:{
+        ...post.data,
+        // htmlContent: post.data.content.map(content => RichText.asHtml(content.body)),
+        readingTime: post.data.content.reduce((acumulator, current)=>{
+        
+          //Quantidade de palavras do heading
+          const headingAmountCurrent = current.heading.split(' ').length;  // 2
+          
+          //Quantidade de palavras no body
+          const bodyAmountCurrent = RichText.asText(current.body).split(' ').length;
+    
+          const totalAmountHeading = acumulator.heading + headingAmountCurrent;
+          const totalAmountBody = acumulator.body + bodyAmountCurrent;
+          
+          return {
+            heading: totalAmountHeading,
+            body: totalAmountBody,
+            time: Math.ceil((totalAmountHeading + totalAmountBody) / 200)
+          };
+        },{
+          heading: 0,
+          body: 0,
+          time: 0
+        }),
+      }
+  };
+
   return (
     <>
       <Head>
@@ -43,58 +77,40 @@ export default function Post() {
       </div> 
       
       <main className={styles.container}> 
-        <article>
-            <h1>Criando um app CRA do zero</h1>
+          <article>
+              <h1>{postFormatted.data.title}</h1>
 
-            <div className={styles.containerDescription}>
-                <div className={styles.blockIcon}>
-                    <span>
-                        <FiCalendar/>
-                        <time>15 Mar 2021</time>           
-                    </span>
+              <div className={styles.containerDescription}>
+                  <div className={styles.blockIcon}>
+                      <span>
+                          <FiCalendar/>
+                          <time>{postFormatted.first_publication_date}</time>           
+                      </span>
 
-                    <span>
-                        <FiUser/>
-                        <strong>15 Mar 2021</strong>
-                    </span> 
+                      <span>
+                          <FiUser/>
+                          <strong>{postFormatted.data.author}</strong>
+                      </span> 
 
-                    <span>
-                        <FiClock/>
-                        <strong>15 Mar 2021</strong>
-                    </span>       
-                </div>
-            </div>
+                      <span>
+                          <FiClock/>
+                          <strong>{postFormatted.data.readingTime.time} min</strong>
+                      </span>       
+                  </div>
+              </div>
 
-            <div className={styles.containerContent}>
-                <h2>Proin et varius</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-                    Nullam dolor sapien, vulputate eu diam at, condimentum hendrerit tellus. Nam facilisis sodales felis, pharetra pharetra lectus auctor sed.
-
-                    Ut venenatis mauris vel libero pretium, et pretium ligula faucibus. Morbi nibh felis, elementum a posuere et, vulputate et erat. Nam venenatis.
-                </p>
-
-                <h2>Cras laoreet mi</h2>
-                <p>
-                    Nulla auctor sit amet quam vitae commodo. Sed risus justo, vulputate quis neque eget, dictum sodales sem. In eget felis finibus, mattis magna a, efficitur ex. Curabitur vitae justo consequat sapien gravida auctor a non risus. Sed malesuada mauris nec orci congue, interdum efficitur urna dignissim. Vivamus cursus elit sem, vel facilisis nulla pretium consectetur. Nunc congue.
-
-                    Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam consectetur massa nec metus condimentum, sed tincidunt enim tincidunt. Vestibulum fringilla risus sit amet massa suscipit eleifend. Duis eget metus cursus, suscipit ante ac, iaculis est. Donec accumsan enim sit amet lorem placerat, eu dapibus ex porta. Etiam a est in leo pulvinar auctor. Praesent sed vestibulum elit, consectetur egestas libero.
-                </p>
-
-                <p>
-                    Nulla auctor sit amet quam vitae commodo. Sed risus justo, vulputate quis neque eget, dictum sodales sem. In eget felis finibus, mattis magna a, efficitur ex. Curabitur vitae justo consequat sapien gravida auctor a non risus. Sed malesuada mauris nec orci congue, interdum efficitur urna dignissim. Vivamus cursus elit sem, vel facilisis nulla pretium consectetur. Nunc congue.
-
-                    Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam consectetur massa nec metus condimentum, sed tincidunt enim tincidunt. Vestibulum fringilla risus sit amet massa suscipit eleifend. Duis eget metus cursus, suscipit ante ac, iaculis est. Donec accumsan enim sit amet lorem placerat, eu dapibus ex porta. Etiam a est in leo pulvinar auctor. Praesent sed vestibulum elit, consectetur egestas libero.
-                </p>
-
-                <p>
-                    Nulla auctor sit amet quam vitae commodo. Sed risus justo, vulputate quis neque eget, dictum sodales sem. In eget felis finibus, mattis magna a, efficitur ex. Curabitur vitae justo consequat sapien gravida auctor a non risus. Sed malesuada mauris nec orci congue, interdum efficitur urna dignissim. Vivamus cursus elit sem, vel facilisis nulla pretium consectetur. Nunc congue.
-
-                    Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam consectetur massa nec metus condimentum, sed tincidunt enim tincidunt. Vestibulum fringilla risus sit amet massa suscipit eleifend. Duis eget metus cursus, suscipit ante ac, iaculis est. Donec accumsan enim sit amet lorem placerat, eu dapibus ex porta. Etiam a est in leo pulvinar auctor. Praesent sed vestibulum elit, consectetur egestas libero.
-                </p>
-            </div>
-        </article>
+              <div className={styles.containerContent}>
+                 {
+                   postFormatted.data.content.map(content => (
+                      <div key={content.heading}>
+                          <h2>{content.heading}</h2>
+                          <div dangerouslySetInnerHTML={{__html:RichText.asHtml(content.body)}}>
+                          </div>
+                      </div>
+                   ))
+                 }
+              </div>
+          </article>
       </main>
     </>
   );
@@ -105,11 +121,9 @@ export const getStaticPaths:GetStaticPaths = async () => {
   // const posts = await prismic.query(TODO);
   return{
     paths:[],
-    fallback:'blocking'
+    fallback: "blocking"
   }
 
-
-  // TODO
 };
 
 export const getStaticProps:GetStaticProps = async({params}) => {
@@ -122,32 +136,30 @@ export const getStaticProps:GetStaticProps = async({params}) => {
   const response = await prismic.getByUID('posts',String(slug),{});
 
   const post = {
+    uid:response.uid,
     first_publication_date: response.first_publication_date,
     data:{
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner:{
-        url: response.href,
+        url: response.data.banner.url,
       },          
-    },
-    author: response.data.author,
-    content: response.data.content.map(content => {
-      return{
-        heading: content.heading,
-        body: content.body.map(bodyContent =>{
-          return {
-            text: bodyContent.text
-          }
-        })
+      author: response.data.author,
+      content: response.data.content.map(content => {
+        return{
+          heading: content.heading,
+          body: content.body.map(bodyContent => {
+            return{ 
+              ...bodyContent}})
       }
     })
   }
+}
 
 
- console.log(JSON.stringify(post, null, 2))
-  
   return {
     props:{
-      
+      post
     }
   }
 };

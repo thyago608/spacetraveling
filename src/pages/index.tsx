@@ -3,7 +3,6 @@ import { GetStaticProps } from 'next';
 
 import { getPrismicClient } from '../services/prismic';
 import Prismic from '@prismicio/client';
-import { RichText } from 'prismic-dom';
 import Head from 'next/head';
 import Link from 'next/link';
 
@@ -134,6 +133,7 @@ export const getStaticProps:GetStaticProps = async () =>{
     next_page: response.next_page,
     results: posts
   }
+
 
 
   return {
