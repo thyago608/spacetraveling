@@ -32,4 +32,8 @@ O projeto foi desenvolvido com as seguintes tecnologias:
     $ yarn dev
 ```
 
+## Visite
+
+- [spacetraveling](https://spacetraveling46723129.vercel.app/)
+
 Desenvolvido por Thyago Ribeiro 👋
