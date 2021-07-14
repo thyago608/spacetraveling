@@ -34,6 +34,6 @@ O projeto foi desenvolvido com as seguintes tecnologias:
 
 ## Visite
 
-- [spacetraveling](https://spacetraveling46723129.vercel.app/)
+[spacetraveling](https://spacetraveling46723129.vercel.app/)
 
 Desenvolvido por Thyago Ribeiro 👋
