@@ -1,4 +1,6 @@
-<img src="/public/logo.svg" alt="spacetraveling" center/>
+<center>
+  <img src="/public/logo.svg" alt="spacetraveling" />
+</center>
 
 ## Sobre
 
