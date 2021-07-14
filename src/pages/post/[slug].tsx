@@ -3,6 +3,8 @@ import Head from 'next/head';
 
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { getPrismicClient } from '../../services/prismic';
+import Prismic from '@prismicio/client';
+import { useRouter } from 'next/router';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -37,18 +39,23 @@ interface PostProps {
 
 export default function Post({post}:PostProps) {
 
+  const { isFallback } = useRouter();
+
+  if(isFallback){
+    return <div>Carregando...</div>;
+  }
+
   const postFormatted = {
       first_publication_date: format(new Date(post.first_publication_date), 'PP', { locale: ptBR}),
       data:{
         ...post.data,
-        // htmlContent: post.data.content.map(content => RichText.asHtml(content.body)),
         readingTime: post.data.content.reduce((acumulator, current)=>{
         
           //Quantidade de palavras do heading
-          const headingAmountCurrent = current.heading.split(' ').length;  // 2
+          const headingAmountCurrent = current.heading?.split(' ').length ?? 0;  // 2
           
           //Quantidade de palavras no body
-          const bodyAmountCurrent = RichText.asText(current.body).split(' ').length;
+          const bodyAmountCurrent = RichText.asText(current.body)?.split(' ').length ?? 0;
     
           const totalAmountHeading = acumulator.heading + headingAmountCurrent;
           const totalAmountBody = acumulator.body + bodyAmountCurrent;
@@ -118,9 +125,29 @@ export default function Post({post}:PostProps) {
 
 export const getStaticPaths:GetStaticPaths = async () => {
   const prismic = getPrismicClient();
-  // const posts = await prismic.query(TODO);
+  //react-hook-swr---melhor-ux-no-consumo-de-api-no-front-end-react
+  //criando-um-blog-com-contador-de-visitas-usando-nextjs-e-mongodb
+
+  const response = await prismic.query([
+    Prismic.predicates.any('my.posts.title',
+      ['Mapas com React usando Leaflet',
+      'Criando um Blog com contador de visitas usando NextJS e MongoDB'
+    ]),
+  ],
+    {
+      fetch:['post.title','post.subtitle','post.author','post.banner','post.content'],
+    })
+
+    // const posts = {
+    //   post1: response.results[0].uid,
+    //   post2: response.results[1].uid
+    // }
+
+
   return{
-    paths:[],
+    paths:[
+      {params:{slug:''}}
+    ],
     fallback: "blocking"
   }
 
