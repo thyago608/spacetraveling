@@ -138,17 +138,12 @@ export const getStaticPaths:GetStaticPaths = async () => {
       fetch:['post.title','post.subtitle','post.author','post.banner','post.content'],
     })
 
-    // const posts = {
-    //   post1: response.results[0].uid,
-    //   post2: response.results[1].uid
-    // }
-
-
   return{
     paths:[
-      {params:{slug:''}}
+      {params:{slug:response.results[0].uid}},
+      {params:{slug:response.results[1].uid}},
     ],
-    fallback: "blocking"
+    fallback: true
   }
 
 };
