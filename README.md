@@ -1,6 +1,5 @@
-<center>
-  <img src="/public/logo.svg" alt="spacetraveling" />
-</center>
+
+ <img src="/public/logo.svg" alt="spacetraveling" align="center" />
 
 ## Sobre
 
