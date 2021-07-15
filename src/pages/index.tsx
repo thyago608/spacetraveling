@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GetStaticProps } from 'next';
 
 import { getPrismicClient } from '../services/prismic';
@@ -31,9 +31,10 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview:boolean;
 }
 
-export default function Home({ postsPagination }:HomeProps) {
+export default function Home({ postsPagination, preview}:HomeProps) {
   const [nextPage, setNexPage] = useState(postsPagination.next_page);
   const [posts, setPosts] = useState<Post[]>(() => {
     const postsFormatted = postsPagination.results.map(post => {
@@ -98,12 +99,20 @@ export default function Home({ postsPagination }:HomeProps) {
         </div>
 
          {nextPage && <button type="button" className={styles.morePosts}onClick={handleNextPage}>Carregar mais posts</button>}
+         
+         {preview && (
+            <aside>
+              <Link href="/api/exit-preview">
+              <a className={commonStyles.preview}>Sair do modo preview</a>
+              </Link>
+            </aside>
+          )}
       </main>
     </>
   );
 }
 
-export const getStaticProps:GetStaticProps = async () =>{
+export const getStaticProps:GetStaticProps = async ({preview = false}) =>{
   //Iniciando um cliente prismic
   const prismic = getPrismicClient();
 
@@ -139,7 +148,8 @@ export const getStaticProps:GetStaticProps = async () =>{
 
   return {
     props:{
-      postsPagination
+      postsPagination,
+      preview,
     },
     revalidate: 60 * 30 // 30 minutes
   }

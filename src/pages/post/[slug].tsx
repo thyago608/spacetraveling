@@ -11,6 +11,8 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import { RichText } from 'prismic-dom';
 
+import Link from 'next/link';
+
 import { FiUser, FiCalendar, FiClock } from 'react-icons/fi';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -35,9 +37,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview:boolean;
 }
 
-export default function Post({post}:PostProps) {
+export default function Post({post, preview}:PostProps) {
 
   const { isFallback } = useRouter();
 
@@ -80,7 +83,7 @@ export default function Post({post}:PostProps) {
       </Head>
 
       <div className={styles.containerBanner}>
-          <img src="/image.svg" alt="banner" />
+          <img src={postFormatted.data.banner.url} alt="banner" />
       </div> 
       
       <main className={styles.container}> 
@@ -118,6 +121,14 @@ export default function Post({post}:PostProps) {
                  }
               </div>
           </article>
+
+          {preview && (
+            <aside>
+              <Link href="/api/exit-preview">
+              <a className={commonStyles.preview}>Sair do modo preview</a>
+              </Link>
+            </aside>
+          )}
       </main>
     </>
   );
@@ -148,14 +159,16 @@ export const getStaticPaths:GetStaticPaths = async () => {
 
 };
 
-export const getStaticProps:GetStaticProps = async({params}) => {
+export const getStaticProps:GetStaticProps = async({params, preview = false, previewData}) => {
   //Parâmetros da rota
   const { slug } = params;
   
   //Iniciando o cliente prismic
   const prismic = getPrismicClient();
   
-  const response = await prismic.getByUID('posts',String(slug),{});
+  const response = await prismic.getByUID('posts',String(slug),{
+    ref:previewData?.ref || null,
+  });
 
   const post = {
     uid:response.uid,
@@ -170,9 +183,7 @@ export const getStaticProps:GetStaticProps = async({params}) => {
       content: response.data.content.map(content => {
         return{
           heading: content.heading,
-          body: content.body.map(bodyContent => {
-            return{ 
-              ...bodyContent}})
+          body: [...content.body]
       }
     })
   }
@@ -181,7 +192,8 @@ export const getStaticProps:GetStaticProps = async({params}) => {
 
   return {
     props:{
-      post
+      post,
+      preview
     }
   }
 };
