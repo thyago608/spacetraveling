@@ -1,12 +1,12 @@
 .containerBanner{
     height: 400px;
-    overflow: hidden;
+    display: flex;
+    justify-content: center;
 
     img{
-        display: block;
-        margin: 0 auto;
+
         width: 50%;
-        height: auto;
+        height: 100%;
     }
         
     @media(max-width:720px){
@@ -57,7 +57,7 @@
     }
 
     .containerContent{
-        margin-top: 4rem;
+        margin: 4rem 0;
         
         h2{
             font-size: 2rem;
@@ -92,3 +92,32 @@
      
     }
 }
+
+
+.navigation{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #282C34;
+
+
+    h3{
+        font-size: 1.125rem;
+        font-weight: 400;
+        color:var(--heading);
+        margin-bottom: 0.5rem;
+    }
+    a{
+        color: var(--highlight);
+        font-weight: 600;
+    }
+
+    div{
+        padding-top: 3rem;
+    }
+
+    div + div{
+        text-align: right;
+    }
+}
+
