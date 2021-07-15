@@ -112,7 +112,8 @@ export const getStaticProps:GetStaticProps = async () =>{
     {
       fetch:['post.title','post.subtitle','post.author','post.banner','post.content'],
       pageSize: 1
-    }
+    },
+  
   );
 
 
